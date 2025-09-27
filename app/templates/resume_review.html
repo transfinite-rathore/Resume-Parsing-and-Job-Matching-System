@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail {
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail strong {
+      color: #007BFF;
+    }
+
+    .links a {
+      display: inline-block;
+      margin-right: 10px;
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .back-btn {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .back-btn a {
+      background: #28a745;
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .back-btn a:hover {
+      background: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Extracted Resume Details</h1>
+
+    <div class="detail"><strong>Name:</strong> {{ name }}</div>
+    <div class="detail"><strong>Mobile No:</strong> {{ number }}</div>
+    <div class="detail"><strong>Email:</strong> {{ email }}</div>
+    <div class="detail"><strong>Education:</strong> {{ details["Education"] }}</div>
+    <div class="detail"><strong>Skills:</strong> {{ details["Skills"] }}</div>
+    
+    <div class="detail links"><strong>Links:</strong>  
+      {% for link in links %}
+        <a href="{{ link }}" target="_blank">{{ link }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="back-btn">
+      <a href="/file_upload">⬅ Upload Another Resume</a>
+    </div>
+  </div>
+</body>
+</html>

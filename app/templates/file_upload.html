@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #444;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 1rem auto;
+            border: 1px solid #ccc;
+            padding: 0.5rem;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            color: green;
+            margin-top: 1rem;
+            font-size: 14px;
+        }
+
+        .score {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f1f8f4;
+            border: 1px solid #c8e6c9;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .score p {
+            margin: 0.3rem 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>File Upload</h1>
+        
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        <form action="/file_upload" method="post" enctype="multipart/form-data">
+            <label for="file">Upload file here</label>
+            <input type="file" name="my_file" id="file" accept=".pdf">
+            <br>
+            <input type="submit" value="Upload">
+        </form>
+
+        {% if score_flag %}
+        <div class="score">
+            <p><strong>Score Calculated Successfully ✅</strong></p>
+            <p>Word Matching Score: {{ keyword_score }}</p>
+            <p>Embedding Matching Score: {{ embedding_score }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
