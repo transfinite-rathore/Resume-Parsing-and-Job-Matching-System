@@ -59,5 +59,5 @@ The system leverages **AI-driven keyword matching** and **resume encoding techni
    SECRET_KEY=<jwt_secret_key>
 5. Start the application:
    ```bash
-   uvicorn app.backend:app --reload
+   uvicorn backend:run_app --reload
   
