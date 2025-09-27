@@ -1,3 +1,3 @@
-env/
-updates.txt 
-.env
+env
+updates.txt
+.env/
