@@ -14,6 +14,22 @@ from ..utils.background_task import extract_resume_details
 router =APIRouter()
 templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__),"templates"))
 
+'''
+2. Applicant APIs
+Route	Method	Functionality	Secured	Accessed By	Permissions
+/applicant/resume/upload	POST	Upload resume file	✅ Yes	Applicant	Applicant only
+/applicant/resume/parse	POST	Parse resume using NLP → JSON	✅ Yes	Applicant	Applicant only
+/applicant/resume/{id}	GET	View specific parsed resume	✅ Yes	Applicant	Only owner
+/applicant/resumes	GET	List all resumes uploaded	✅ Yes	Applicant	Only owner
+/jobs	GET	Browse/search jobs (with filters)	❌ No	Applicant	Public but filtering needs Applicant login for personalization
+/jobs/match	GET	Get best-fit jobs (resume vs jobs matching)	✅ Yes	Applicant	Applicant only
+/jobs/apply/{job_id}	POST	Apply to a job	✅ Yes	Applicant	Applicant only
+/applications	GET	View jobs applied to + status	✅ Yes	Applicant	Only owner
+
+
+'''
+
+
 
 ##TESTED OK
 @router.get("/file_upload")
@@ -81,9 +97,9 @@ async def extracted_details(req:Request,file_path):
     )
 
 
-@router.post("/delete_resume/resume_id")
+@router.post("/delete_resume/{resume_id}")
 @handle_try_except
-async def delete_resume(req:Request,file_name:str,payload=Depends(verfiy_applicant_JWT)):
+async def delete_resume(req:Request,file_name:str,resume_id:str,payload=Depends(verfiy_applicant_JWT)):
     cloud_res=delete_pdf_from_cloudinary(file_name=file_name.strip())
     if(cloud_res["result"]!="ok"):
         raise HTTPException(status_code=501,detail="File not Deleted")    
@@ -100,13 +116,15 @@ async def delete_resume(req:Request,file_name:str,payload=Depends(verfiy_applica
     return {"Success":"Resume Deletion completely"}
 
 
-
 ## TESTED OK
 ## List all resumes
-@router.get("/list-all-resumes")
+@router.get("/list_all_resumes")
 @handle_try_except
-async def list_resumes(req:Request):
-    result_cursor=req.app.mongo_db["resume"].find(projection={"_id":0,"id":0})
+async def list_resumes(req:Request,job_profile:str=None):
+    query={}
+    if job_profile:
+        query["profile"]=job_profile
+    result_cursor=req.app.mongo_db["resume"].find(query,projection={"_id":0,"id":0})
     result_cursor_list=await result_cursor.to_list()
     print(result_cursor_list)
     if(len(result_cursor_list)==0):
@@ -115,7 +133,7 @@ async def list_resumes(req:Request):
 
 
 ## List resume based on resume_id
-@router.get("/list-resume/{resume_id}")
+@router.get("/list_resume/{resume_id}")
 @handle_try_except
 async def list_resume(req:Request,resume_id:str):
     database=req.app.mongo_db
@@ -123,30 +141,22 @@ async def list_resume(req:Request,resume_id:str):
     if not saved_resume:
         raise HTTPException(status_code=501,detail="No resume fetched based on given id")
     return {"Message":"Success","Data":saved_resume}
-    ...
 
-## List all resumes of particular applicant
+
+## Filter resume based on job_profile for specific applicant
 @router.get("/applicat_resumes")
 @handle_try_except
-async def applicant_all_resume(req:Request,payload=Depends(verfiy_applicant_JWT)):
+async def applicant_all_resume(req:Request,job_profile:str=None,payload=Depends(verfiy_applicant_JWT)):
     user_id=payload["_id"]
     database=req.app.mongo_db
-    result_cursor=database["resume"].find({"applicant_id":str(user_id)},{"_id":0})
+    query={}
+    query["applicant_id"]=ObjectId(user_id)
+    if job_profile:
+        query["profile"]=job_profile
+    result_cursor=database["resume"].find(query,{"_id":0})
     result_list=await result_cursor.to_list()
     if(len(result_list)==0):
         return {"message":"No Resume Found for given Applicant"}
-    return {"Data":result_list}
-
-
-## List all resumes belongs to particular profile
-@router.get("/applicat_resumes/{job_profile}")
-@handle_try_except
-async def applicant_all_resume(req:Request,job_profile:str):
-    database = req.app.mongo_db
-    result_cursor = database["resume"].find({"profile":job_profile})
-    result_list = await result_cursor.to_list()
-    if(len(result_list)==0):
-        return {"message":"No Resume Found for given Job profile"}
     return {"Data":result_list}
 
 

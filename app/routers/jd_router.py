@@ -4,14 +4,34 @@ from ..utils.token_setup import verfiy_recuriter_JWT
 from ..models.JD import JobDescription
 from ..utils.background_task import find_jd_resume_score
 from bson import ObjectId
+from typing import Optional
 
 router=APIRouter()
+
+'''
+3. Recruiter APIs
+Route	Method	Functionality	Secured	Accessed By	Permissions
+# DONE   /recruiter/job/create	POST	Post a new job description	✅ Yes	Recruiter	Recruiter only
+/recruiter/job/{job_id}	PUT	Update job description	✅ Yes	Recruiter	Only job owner (recruiter)
+#DONE   /recruiter/job/{job_id}	DELETE	Delete job posting	✅ Yes	Recruiter	Only job owner (recruiter)
+#DONE   /recruiter/jobs	GET	List all jobs posted by recruiter	✅ Yes	Recruiter	Only job owner (recruiter)
+#DONE   /recruiter/job/{job_id}/applicants	GET	List all applicants for a specific job	✅ Yes	Recruiter	Only job owner
+#DONE   /recruiter/job/{job_id}/match	GET	Get best-fit resumes for a job	✅ Yes	Recruiter	Only job owner
+/recruiter/applicant/{applicant_id}	GET	View applicant details (parsed resume)	✅ Yes	Recruiter	Only for applicants who applied to recruiter’s jobs
+/recruiter/applicant/{applicant_id}/shortlist	POST	Shortlist applicant for a job	✅ Yes	Recruiter	Only job owner
+/recruiter/applicant/{applicant_id}/reject	POST	Reject applicant for a job	✅ Yes	Recruiter	Only job owner
+
+
+
+'''
+
+
 
 
 # get all jd
 @handle_try_except
-@router.get("/list-jd")
-async def get_all_jd(req:Request):
+@router.get("/jobs")
+async def get_all_jobs(req:Request):
     database = req.app.mongo_db
     jd_cursor = database["job_description"].find(projection={"_id":0})
     jd_list = await jd_cursor.to_list()
@@ -21,39 +41,39 @@ async def get_all_jd(req:Request):
 
 # get jd with given id
 @handle_try_except
-@router.get("/list-jd/{jd_id}")
-async def get_jd(req:Request,jd_id:str):
+@router.get("/job/{job_id}")
+async def get_job(req:Request,job_id:str):
     database=req.app.mongo_db
-    saved_jd=await database["job_description"].find_one({"_id":ObjectId(jd_id)},projection={"_id":0})
+    saved_jd=await database["job_description"].find_one({"_id":ObjectId(job_id)},projection={"_id":0})
     if not saved_jd:
         raise HTTPException(status_code=501,detail="No JD fetched based on given id")
     return {"Message":"Success","Data":saved_jd}
 
-# get jd with experience greater equal to
-@handle_try_except
-@router.get("/list_jd/{experience}")
-async def get_jd_by_exp(req:Request,experience:float):
-    database=req.app.mongo_db
-    jd_cursor = database["job_description"].find({"required_experience":{"$gt":experience}})
-    jd_list=await jd_cursor.to_list()
-    if not jd_list:
-        raise HTTPException(status_code=501,detail="No JD match given experience criteria")
-    return {"Message":"Success","Data":jd_list}
 
-# get jd for given role
+## Filter job descripiton based criteria
 @handle_try_except
-@router.get("/list-jd/{role}")
-async def get_jd_by_role(req:Request,role:str):
+@router.get("/job")
+async def get_job_based_on_filters(req:Request,experience:Optional[float]=None,role:Optional[str]=None):
     database=req.app.mongo_db
-    jd_cursor = database["job_description"].find({"required_experience":role})
-    jd_list=await jd_cursor.to_list()
-    if not jd_list:
-        raise HTTPException(status_code=501,detail="No JD match given job role criteria")
-    return {"Message":"Success","Data":jd_list}
+    query={}
+    if experience:
+        query["required_experience"]={"$gt":experience}
+    if role:
+        query["role"]=role
+    job_cursor = database["job_description"].find(query)
+    job_list= await job_cursor.to_list()
+
+    if len(job_list)<1:
+        raise HTTPException(status_code=501,detail="No JD match given experience criteria")
+    return {"Message":"Success","Data":job_list}
+
+
+
 
 ## get jd posted by specific recruiter
-@router.get("/list-jd")
-async def list_jd_of_recruiter(req:Request,payload=Depends(verfiy_recuriter_JWT)):
+@handle_try_except
+@router.get("/job")
+async def recruiter_jobs(req:Request,payload=Depends(verfiy_recuriter_JWT)):
     database=req.app.mongo_db
     id = payload["_id"]
     jd_cursor = database["job_description"].find({"recruiter_id":ObjectId(id)})
@@ -63,6 +83,22 @@ async def list_jd_of_recruiter(req:Request,payload=Depends(verfiy_recuriter_JWT)
         raise HTTPException(status_code=501,detail="No jd found with given recruiter id")
     return {"Message":"Success","Data":jd_list}
 
+
+
+##best_match
+@handle_try_except
+@router.get("/job/{job_id}/best_match")
+async def get_best_match_resume(req:Request,job_id:str,payload=Depends(verfiy_recuriter_JWT)):
+    database=req.app.mongo_db
+    job_cursor = database["job_description"].find({"_id":ObjectId(job_id),"recruiter_id":ObjectId(payload["id"])},projection={"best_match":1,"best_score":1})
+    job_list= await job_cursor.to_list(length=1)
+
+    if not job_list:
+        raise HTTPException(status_code=404, detail="Job not found or no matches yet")
+    best_match = job_list[0].get("best_match", [])
+    best_score = job_list[0].get("best_score", None)
+
+    return {"Best_match": best_match, "Best_score": best_score}
 
 
 # post resume
@@ -81,6 +117,16 @@ async def post_jd(req:Request,res:Response,job_desc:JobDescription,background_ta
 
 
 # delete specific jd
+@handle_try_except
+@router.delete("/job/{job_id}")
+async def delete_job(req:Request,job_id:str,payload=Depends(verfiy_recuriter_JWT)):
+    database=req.app.mongo_db
+
+    deleted_job = await database["job_description"].find_one_and_delete({"_id":ObjectId(job_id),"recruiter_id":ObjectId(payload["id"])})
+    if not deleted_job:
+        raise HTTPException(status_code=404, detail="Job not found or you are not authorized to delete it")
+    return {"message":"Deletion Success"}
+    ...
 
 # update given jd
 

@@ -1,10 +1,23 @@
 from fastapi import Request,Response,Depends,HTTPException,APIRouter
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from ..models.Recuriter import Recruiter,RecuriterLogin,change_recuriter_password
 from ..utils.Exception_handling import handle_try_except
 from ..utils.password_setups import verify_password,change_password
 from ..utils.token_setup import generate_access_token,generate_refresh_token,verfiy_recuriter_JWT
-
+import os
 router=APIRouter()
+
+templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..","templates"))
+
+
+@router.get("/register")
+async def register_page(req:Request,response_class=HTMLResponse):
+    return templates.TemplateResponse(request=req,name="recruiter_register.html")
+
+@router.get("/login")
+async def login_page(req:Request,response_class=HTMLResponse):
+    return templates.TemplateResponse(request=req,name="recruiter_login.html")
 
 
 ## Tested OK

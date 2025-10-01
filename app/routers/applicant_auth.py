@@ -1,18 +1,40 @@
 from fastapi import Request,Response,APIRouter,HTTPException,Depends
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from ..models.Applicant import ApplicantLogin,ApplicantRegister,change_applicant_password
 from ..utils.password_setups import verify_password,change_password
 from ..utils.token_setup import generate_access_token,generate_refresh_token,verfiy_applicant_JWT
 from dotenv import dotenv_values
 from ..utils.Exception_handling import handle_try_except
+import os
 
 config=dotenv_values(".env")
 
+templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..","templates"))
 
 auth_router=APIRouter()
 
 
+@auth_router.get("/applicant_register")
+async def register_page(req:Request,response_class:HTMLResponse):
+    return templates.TemplateResponse(
+        request=req,name="applicant_register.html"
+    )
+
+
+
+@auth_router.get("/applicant_login")
+async def login_page(req:Request,reponse_class:HTMLResponse):
+    return templates.TemplateResponse(request=req,name="applicant_login.html")
+
+
+
+
+
+
+
 ## Tested OK
-@auth_router.post("/register")
+@auth_router.post("/applicant_register")
 async def register(request:Request,user:ApplicantRegister):
     '''
     1 get details from frontend to backend
@@ -37,7 +59,7 @@ async def register(request:Request,user:ApplicantRegister):
 
 
 ## Tested OK
-@auth_router.post("/login")
+@auth_router.post("/applicant_login")
 async def login(req:Request,res:Response,user:ApplicantLogin):
     try:
         database=req.app.mongo_db

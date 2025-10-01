@@ -7,3 +7,5 @@ class JobDescription(BaseModel):
     required_experience:float=Field(ge=0)
     package_offered:Optional[float]
     description:str=Field(max_length=500)
+    best_match:Optional[str]
+    best_score:Optional[float]

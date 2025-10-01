@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Recruiter Registration</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Recruiter Login</h1>
+
+    <form method="post" action="/register/recruiter" enctype="multipart/form-data">
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+
+    {% if message %}
+      <p style="color:green;">{{ message }}</p>
+    {% endif %}
+
+    <p><a href="/">Back to Home</a></p>
+  </div>
+</body>
+</html>

@@ -4,19 +4,19 @@ from fastapi.responses import HTMLResponse
 import os
 
 
-job_description = """We are looking for a Machine Learning Engineer with experience in Python , SQL , AWS , and deploying deep learning models using TensorFlow ."""
+
+# job_description = """We are looking for a Machine Learning Engineer with experience in Python , SQL , AWS , and deploying deep learning models using TensorFlow ."""
 
 router =APIRouter()
 
-
-templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
+templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..","templates"))
 
 
 @router.get("/")
 def home(req:Request,response_class=HTMLResponse):
     # return {"msg":"hello world from FastAPI!!!!"}
     return templates.TemplateResponse(
-        request=req,name="index.html"
+        request=req,name="home_page.html"
     )
 
 
