@@ -2,7 +2,6 @@ import re
 from nltk.corpus import stopwords
 import spacy
 
-# nltk.download('stopwords')
 nlp = spacy.load("en_core_web_sm")
 stop_words = set(stopwords.words('english'))
 
@@ -28,7 +27,6 @@ def extract_git_linkedin_link(links:list):
     for i in links:
         if(("linkedin.com" in i) and len(linkedin_link)==0):
             linkedin_link=i
-
         elif(("github.com" in i) and len(git_link)==0):
             matched_link=re.match(r"(https://github\.com/[^/]+/)", i)
             if(matched_link):
@@ -37,7 +35,6 @@ def extract_git_linkedin_link(links:list):
             continue
         if(len(git_link)!=0 and len(linkedin_link)!=0):
             break
-    
     return (linkedin_link,git_link)
 
 def remove_links(text):
@@ -60,11 +57,16 @@ def remove_stop_word(text):
 def split_based_on_newlines(text):
     return [i.strip() for i in text.split("\n") if len(i)>2]
 
+def combine_text(words_array):
+    details=""
+    for i in words_array:
+        details+=i+" "  
+    return details.strip()
+
 def combine_data(text:dict):
     chunk_to_summarize=""
     for i in text["details"].keys():
         chunk_to_summarize+=text["details"][i]+" "
-    
     return chunk_to_summarize
 
 def find_section(text):

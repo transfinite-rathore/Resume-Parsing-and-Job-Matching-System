@@ -2,33 +2,17 @@ from fastapi import APIRouter,Request,File,UploadFile,HTTPException,Depends,Back
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from bson import ObjectId
-import os
-import shutil
 from ResumerParsing.main import parsed_resume_details
 from app.utils.token_setup import verfiy_applicant_JWT
 from ..cloudinary_setup.config import upload_pdf_to_cloudinary,delete_pdf_from_cloudinary
 from ..models.Resume import Resume
 from ..utils.Exception_handling import handle_try_except
 from ..utils.background_task import extract_resume_details
+import os
+import shutil
 
 router =APIRouter()
 templates=Jinja2Templates(directory=os.path.join(os.path.dirname(__file__),"templates"))
-
-'''
-2. Applicant APIs
-Route	Method	Functionality	Secured	Accessed By	Permissions
-/applicant/resume/upload	POST	Upload resume file	✅ Yes	Applicant	Applicant only
-/applicant/resume/parse	POST	Parse resume using NLP → JSON	✅ Yes	Applicant	Applicant only
-/applicant/resume/{id}	GET	View specific parsed resume	✅ Yes	Applicant	Only owner
-/applicant/resumes	GET	List all resumes uploaded	✅ Yes	Applicant	Only owner
-/jobs	GET	Browse/search jobs (with filters)	❌ No	Applicant	Public but filtering needs Applicant login for personalization
-/jobs/match	GET	Get best-fit jobs (resume vs jobs matching)	✅ Yes	Applicant	Applicant only
-/jobs/apply/{job_id}	POST	Apply to a job	✅ Yes	Applicant	Applicant only
-/applications	GET	View jobs applied to + status	✅ Yes	Applicant	Only owner
-
-
-'''
-
 
 
 ##TESTED OK

@@ -8,25 +8,6 @@ from typing import Optional
 
 router=APIRouter()
 
-'''
-3. Recruiter APIs
-Route	Method	Functionality	Secured	Accessed By	Permissions
-# DONE   /recruiter/job/create	POST	Post a new job description	✅ Yes	Recruiter	Recruiter only
-/recruiter/job/{job_id}	PUT	Update job description	✅ Yes	Recruiter	Only job owner (recruiter)
-#DONE   /recruiter/job/{job_id}	DELETE	Delete job posting	✅ Yes	Recruiter	Only job owner (recruiter)
-#DONE   /recruiter/jobs	GET	List all jobs posted by recruiter	✅ Yes	Recruiter	Only job owner (recruiter)
-#DONE   /recruiter/job/{job_id}/applicants	GET	List all applicants for a specific job	✅ Yes	Recruiter	Only job owner
-#DONE   /recruiter/job/{job_id}/match	GET	Get best-fit resumes for a job	✅ Yes	Recruiter	Only job owner
-/recruiter/applicant/{applicant_id}	GET	View applicant details (parsed resume)	✅ Yes	Recruiter	Only for applicants who applied to recruiter’s jobs
-/recruiter/applicant/{applicant_id}/shortlist	POST	Shortlist applicant for a job	✅ Yes	Recruiter	Only job owner
-/recruiter/applicant/{applicant_id}/reject	POST	Reject applicant for a job	✅ Yes	Recruiter	Only job owner
-
-
-
-'''
-
-
-
 
 # get all jd
 @handle_try_except
